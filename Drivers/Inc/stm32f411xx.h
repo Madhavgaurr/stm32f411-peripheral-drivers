@@ -187,15 +187,15 @@ typedef struct
 
 // DMA AND Interrupts remaining
 
-typedef struct
-{
-      volatile uint32_t      S3M1AR     ;
-      volatile uint32_t      S3FCR           ;
-      volatile uint32_t      S4CR         ;
-      volatile uint32_t      S4NDTR         ;
-      volatile uint32_t      S4PAR             ;
-      //volatile uint32_t              ;
-}DMA_RegDef_t;
+// typedef struct
+// {
+//       volatile uint32_t      S3M1AR     ;
+//       volatile uint32_t      S3FCR           ;
+//       volatile uint32_t      S4CR         ;
+//       volatile uint32_t      S4NDTR         ;
+//       volatile uint32_t      S4PAR             ;
+//       //volatile uint32_t              ;
+// }DMA_RegDef_t;
 
 
 typedef struct
@@ -225,11 +225,58 @@ typedef struct
 
 
 
+#define      RCC      ((RCC_RegDef_t*)(RCC_BASE_ADDR))
+
+
+#define      GPIOA    ((GPIO_RegDef_t*)(GPIOA_BASE_ADDR))
+#define      GPIOB    ((GPIO_RegDef_t*)(GPIOB_BASE_ADDR))
+#define      GPIOC    ((GPIO_RegDef_t*)(GPIOC_BASE_ADDR))
+#define      GPIOD    ((GPIO_RegDef_t*)(GPIOD_BASE_ADDR))
+#define      GPIOE    ((GPIO_RegDef_t*)(GPIOE_BASE_ADDR))
+#define      GPIOH    ((GPIO_RegDef_t*)(GPIOH_BASE_ADDR))
+
+
+
+//                            Clock Control Macros for GPIO Peripheral
+
+#define            GPIOA_PCLK_EN()           RCC->AHB1ENR   |=   (1<<0)
+#define            GPIOB_PCLK_EN()           RCC->AHB1ENR   |=   (1<<1)
+#define            GPIOC_PCLK_EN()           RCC->AHB1ENR   |=   (1<<2)
+#define            GPIOD_PCLK_EN()           RCC->AHB1ENR   |=   (1<<3)
+#define            GPIOE_PCLK_EN()           RCC->AHB1ENR   |=   (1<<4)
+#define            GPIOH_PCLK_EN()           RCC->AHB1ENR   |=   (1<<7)
+
+
+#define            GPIOA_PCLK_DI()           RCC->AHB1ENR   &=   ~(1<<0)
+#define            GPIOB_PCLK_DI()           RCC->AHB1ENR   &=   ~(1<<1)
+#define            GPIOC_PCLK_DI()           RCC->AHB1ENR   &=   ~(1<<2)
+#define            GPIOD_PCLK_DI()           RCC->AHB1ENR   &=   ~(1<<3)
+#define            GPIOE_PCLK_DI()           RCC->AHB1ENR   &=   ~(1<<4)
+#define            GPIOH_PCLK_DI()           RCC->AHB1ENR   &=   ~(1<<7)
+
+//
 
 
 
 
 
+
+
+
+
+
+/**********************************************************************************************
+ *                                    Generic Macros
+ * ********************************************************************************************/
+
+#define        ENABLE          1
+#define        DISABLE         0
+
+#define        SET             ENABLE 
+#define        RESET           DISABLE
+
+
+#include "stm32f411xx_gpio_driver.h"
 
 
 

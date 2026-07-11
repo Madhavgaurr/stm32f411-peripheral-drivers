@@ -11,6 +11,7 @@ RM := rm -rf
 -include sources.mk
 -include Startup/subdir.mk
 -include Src/subdir.mk
+-include Drivers/Src/subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -60,7 +61,7 @@ main-build: 4DRIVER.elf secondary-outputs
 
 # Tool invocations
 4DRIVER.elf 4DRIVER.map: $(OBJS) $(USER_OBJS) /home/madhav-gaur/Programming/Embedded\ /Embedded-C/My_workspace/STM32F411CEU6/4DRIVER/STM32F411CEUX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "4DRIVER.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/madhav-gaur/Programming/Embedded /Embedded-C/My_workspace/STM32F411CEU6/4DRIVER/STM32F411CEUX_FLASH.ld" --specs=nosys.specs -Wl,-Map="4DRIVER.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "4DRIVER.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/madhav-gaur/Programming/Embedded /Embedded-C/My_workspace/STM32F411CEU6/4DRIVER/STM32F411CEUX_FLASH.ld" --specs=nosys.specs -Wl,-Map="4DRIVER.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
