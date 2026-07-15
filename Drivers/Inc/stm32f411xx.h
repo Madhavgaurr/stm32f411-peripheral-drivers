@@ -162,10 +162,7 @@ typedef struct
 {
       volatile uint32_t MEMRMP          ;
       volatile uint32_t PMC             ;
-      volatile uint32_t EXTICR1         ;
-      volatile uint32_t EXTICR2         ;
-      volatile uint32_t EXTICR3         ;
-      volatile uint32_t EXTICR4         ;
+      volatile uint32_t EXTICR[4]       ;
       volatile uint32_t CMPCR           ;
 }SYSCFG_RegDef_t;
 
@@ -179,13 +176,10 @@ typedef struct
       volatile uint32_t ODR             ;
       volatile uint32_t BSRR            ;
       volatile uint32_t LCKR            ;
-      volatile uint32_t AFRL            ;
-      volatile uint32_t AFRH            ;
-
+      volatile uint32_t AFR[2]          ;
 }GPIO_RegDef_t;
 
 
-// DMA AND Interrupts remaining
 
 // typedef struct
 // {
@@ -196,6 +190,28 @@ typedef struct
 //       volatile uint32_t      S4PAR             ;
 //       //volatile uint32_t              ;
 // }DMA_RegDef_t;
+
+
+typedef struct 
+{
+      volatile uint32_t IMR    ;
+      volatile uint32_t EMR    ;
+      volatile uint32_t RTSR   ;
+      volatile uint32_t FTSR   ;
+      volatile uint32_t SWIER  ;
+      volatile uint32_t PR     ;
+      
+}EXTI_RegDef_t;
+
+typedef struct 
+{
+      volatile uint32_t MEMRMP    ;
+      volatile uint32_t PMC       ;
+      volatile uint32_t EXTICR[4] ;  
+      volatile uint32_t CMPCR     ;   
+}SYSCFG_RegDef_t;
+
+
 
 
 typedef struct
@@ -256,24 +272,50 @@ typedef struct
 
 //
 
+/**********************************Macros to reset GPIOx peripheral*******************************/
 
+/*do while condition zero loop : This is a technique in 'C' programming to execute multiple 'C'
+ statements using single 'C' macro                                                               */
 
+#define    GPIOA_REG_RESET()    do{ RCC->AHB1RSTR |= (1<<0)  ; RCC->AHB1RSTR &= ~(1<<0)  ;  }while(0)
+#define    GPIOB_REG_RESET()    do{ RCC->AHB1RSTR |= (1<<1)  ; RCC->AHB1RSTR &= ~(1<<1)  ;  }while(0)
+#define    GPIOC_REG_RESET()    do{ RCC->AHB1RSTR |= (1<<2)  ; RCC->AHB1RSTR &= ~(1<<2)  ;  }while(0)
+#define    GPIOD_REG_RESET()    do{ RCC->AHB1RSTR |= (1<<3)  ; RCC->AHB1RSTR &= ~(1<<3)  ;  }while(0)
+#define    GPIOE_REG_RESET()    do{ RCC->AHB1RSTR |= (1<<4)  ; RCC->AHB1RSTR &= ~(1<<4)  ;  }while(0)
+#define    GPIOH_REG_RESET()    do{ RCC->AHB1RSTR |= (1<<7)  ; RCC->AHB1RSTR &= ~(1<<7)  ;  }while(0)
 
+// SYSCFG & EXTI
 
+#define    EXTI                 ((EXTI_RegDef_t*)(EXTI_BASE_ADDR))
+#define    SYSCFG               ((SYSCFG_RegDef_t*)(SYSCFG_BASE_ADDR))
+// SYSCFG Enabling Macro
 
-
-
+#define    SYSCFG_PCLK_EN()     ( RCC->APB2ENR |=  (1<<14) )
 
 
 /**********************************************************************************************
  *                                    Generic Macros
  * ********************************************************************************************/
 
-#define        ENABLE          1
-#define        DISABLE         0
+#define ENABLE            1
+#define DISABLE           0
 
-#define        SET             ENABLE 
-#define        RESET           DISABLE
+#define SET               ENABLE 
+#define RESET             DISABLE
+
+#define FLAG_RESET        RESET
+#define FLAG_SET          SET
+
+#define GPIO_PIN_SET      SET
+#define GPIO_PIN_RESET    RESET
+
+
+#define GPIO_BASEADDR_TO_CODE(x)                       ( (x==GPIOA) ? 0 :\
+                                                         (x==GPIOB) ? 1 :\
+									   (x==GPIOC) ? 2 :\
+									   (x==GPIOD) ? 3 :\
+									   (x==GPIOE) ? 4 :\
+									   (x==GPIOH) ? 7 :0)
 
 
 #include "stm32f411xx_gpio_driver.h"
