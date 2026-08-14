@@ -52,6 +52,12 @@ default.size.stdout \
 OBJDUMP_LIST += \
 4DRIVER.list \
 
+OBJCOPY_HEX += \
+4DRIVER.hex \
+
+OBJCOPY_BIN += \
+4DRIVER.bin \
+
 
 # All Target
 all: main-build
@@ -75,12 +81,22 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
+4DRIVER.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "4DRIVER.hex"
+	@echo 'Finished building: $@'
+	@echo ' '
+
+4DRIVER.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "4DRIVER.bin"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 # Other Targets
 clean:
-	-$(RM) 4DRIVER.elf 4DRIVER.list 4DRIVER.map default.size.stdout
+	-$(RM) 4DRIVER.bin 4DRIVER.elf 4DRIVER.hex 4DRIVER.list 4DRIVER.map default.size.stdout
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX) $(OBJCOPY_BIN)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'

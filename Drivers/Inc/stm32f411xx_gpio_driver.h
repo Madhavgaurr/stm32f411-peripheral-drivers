@@ -19,7 +19,7 @@ typedef struct{
      uint8_t   GPIO_PinNumber      ;
      uint8_t   GPIO_PinSpeed       ;
      uint8_t   GPIO_PinPuPdControl ;
-     uint8_t   GPIO_OPType         ;
+     uint8_t   GPIO_PinOPType         ;
      uint8_t   GPIO_PinAltFunMode  ;
 }GPIO_PinConfig_t;
 

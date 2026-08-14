@@ -182,7 +182,7 @@ void GPIO_Init(GPIO_Handle_t   *pGPIOHandle)
 		   
            SYSCFG->EXTICR[temp1] |= portcode << (temp2*4) ;
 
-            //  3 . Enable the EXTI interrupt delivery using IMR (Interrupt Mak Regsiter)
+            //  3 . Enable the EXTI interrupt delivery using IMR (Interrupt Mask Regsiter)
            
 		   EXTI->IMR    |=  (1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
 
@@ -192,7 +192,7 @@ void GPIO_Init(GPIO_Handle_t   *pGPIOHandle)
 
         temp = 0 ;
 
-        temp = (pGPIOHandle->GPIO_PinConfig.GPIO_OPType) << (pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber)      ;
+        temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinOPType) << (pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber)      ;
         pGPIOHandle->pGPIOx->OTYPER        &=         ~(0x1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber)    ;
         pGPIOHandle->pGPIOx->OTYPER        |=  temp                                                           ;    
         
@@ -499,15 +499,135 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t  *pGPIOx , uint8_t PinNumber)
 
 void GPIO_IRQInterruptConfig(uint8_t IRQNumber ,  uint8_t EnorDi)
 {
+    if(EnorDi==ENABLE)
+	{
+        if(IRQNumber<=31)
+		{
 
+			// Program ISER0 Register
+
+			NVIC_ISER0  |= ( 1 << IRQNumber ) ;
+
+		}else if( IRQNumber>31  && IRQNumber<64 )
+		{
+
+			// Program ISER1 Register
+
+			NVIC_ISER1  |= ( 1 << (IRQNumber%32) ) ;
+            printf("%d",IRQNumber) ;
+
+		}else if( IRQNumber>=64 && IRQNumber<96 ){
+
+			// Program ISER2 Register
+
+            NVIC_ISER2  |= ( 1 << (IRQNumber%64) ) ;
+		}
+	}else{
+        if(IRQNumber<=31)
+		{
+
+        	// Program ICER0 Register
+
+			NVIC_ICER0  |= ( 1 << IRQNumber ) ;
+
+		}else if( IRQNumber>31  && IRQNumber<64 )
+		{
+
+			// Program ICER1 Register
+
+			NVIC_ICER1  |= ( 1 << ( IRQNumber % 32 ) ) ;
+
+		}else if( IRQNumber>=64 && IRQNumber<96 ){
+
+			// Program ICER2 Register
+
+			NVIC_ICER2  |= ( 1 << ( IRQNumber % 64 ) ) ;
+
+		}
+	}
 }
+
+/*
+ *  Interrupt Priority Handling 
+ */
+
+/*******************************************************************************
+ * @fn                         -  GPIO_PeriClockControl
+ *
+ * @brief                      -  This function enables or disables peripheral clock for the given GPIO port
+ *
+ * @param[in]                  -  Base address of the gpio peripheral
+ * @param[in]                  -  Enable or Disable macros
+ * @param[in]                  -
+ *
+ * @return                     -
+ *
+ * @note                       -
+ *
+ *
+ ********************************************************************************/
 
 void GPIO_IRQPriorityConfig(uint8_t IRQNumber , uint8_t IRQPriority)
 {
+    // 1 . Find out the ipr register 
 
+	uint8_t iprx         = IRQNumber/4     ;
+	uint8_t iprx_section = IRQNumber%4     ;
+
+	uint8_t shift_amount =  (8*iprx_section) + (8-NO_PR_BITS_IMPLEMENTED) ;
+
+	*(NVIC_IPR_BASE_ADDR + (iprx))  |=  (IRQPriority << shift_amount)   ;
 }
+
+/*
+ * Interrupt Handling Flow in STM32 Cortex-M
+ *
+ * Suppose a button connected to PA0 generates an interrupt through EXTI0.
+ *
+ * 1. The button press causes a rising or falling edge on PA0.
+ *
+ * 2. The EXTI peripheral detects the configured edge and sets the
+ *    corresponding pending bit in the EXTI Pending Register (EXTI_PR).
+ *
+ * 3. If the EXTI line is unmasked and enabled, EXTI sends an interrupt
+ *    request to the NVIC through the corresponding IRQ channel
+ *    (EXTI0 -> IRQ number 6 in STM32F4).
+ *
+ * 4. The NVIC receives the interrupt request and sets its own pending
+ *    status internally. Therefore both EXTI and NVIC maintain pending
+ *    information.
+ *
+ * 5. The processor checks whether:
+ *      - interrupts are globally enabled,
+ *      - the interrupt is enabled in NVIC,
+ *      - no higher priority interrupt is currently executing.
+ *
+ * 6. If accepted, the Cortex-M hardware automatically saves the current
+ *    CPU context (R0-R3, R12, LR, PC, xPSR) onto the stack.
+ *
+ * 7. The processor then uses the IRQ number to index into the Vector Table.
+ *    The Vector Table contains addresses of ISR functions.
+ *
+ * 8. The address stored in the EXTI0 vector entry is loaded into the PC,
+ *    causing execution of EXTI0_IRQHandler().
+ *
+ * 9. Inside the ISR, the required interrupt handling code is executed.
+ *
+ * 10. The EXTI pending flag must be cleared by software. If EXTI_PR is not
+ *     cleared, the interrupt request remains pending and the ISR may be
+ *     entered repeatedly.
+ *
+ * 11. When the ISR returns, the processor automatically restores the saved
+ *     context from the stack and resumes execution of the interrupted code.
+ */
 
 void GPIO_IRQHandling(uint8_t PinNumber)                                    
 {
-    
+    // Clearing the EXTI PR (Pending Register)
+
+	if(EXTI->PR & (1<<PinNumber))
+	{
+		// Clear
+		EXTI->PR   |= (1<<PinNumber) ;
+	}
 }

@@ -31,6 +31,33 @@
 */
 
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <stddef.h>
+#include <stdbool.h>
+
+/************************************************************************************************
+ ***************************************ARM Cortex Processor Specific Details*********************
+ *************************************************************************************************/
+
+ #define NVIC_ISER0                  (*( volatile uint32_t*)0xE000E100)
+ #define NVIC_ISER1                  (*( volatile uint32_t*)0xE000E104)
+ #define NVIC_ISER2                  (*( volatile uint32_t*)0xE000E108)
+ #define NVIC_ISER3                  (*( volatile uint32_t*)0xE000E10C)
+
+
+
+ #define NVIC_ICER0                  (*( volatile uint32_t*)0xE000E180)
+ #define NVIC_ICER1                  (*( volatile uint32_t*)0xE000E184)
+ #define NVIC_ICER2                  (*( volatile uint32_t*)0xE000E188)
+ #define NVIC_ICER3                  (*( volatile uint32_t*)0xE000E18C)
+
+ #define SYSTICK_BASE_ADDR   0xE000E010UL
+
+ #define NVIC_IPR_BASE_ADDR          (( volatile uint32_t*)0xE000E400)
+
+ #define NO_PR_BITS_IMPLEMENTED      4 
+
 
 /*************************************************************************************************
  *                                 Embedded Flash Memory Interface
@@ -104,7 +131,7 @@
 #define ADC1_BASE_ADDR                  ( APB2_PERIPHERAL_BASE_ADDR + 0x2000 )
 #define SDIO_BASE_ADDR                  ( APB2_PERIPHERAL_BASE_ADDR + 0x2C00 )
 #define SPI1_I2S1_BASE_ADDR             ( APB2_PERIPHERAL_BASE_ADDR + 0x3000 )
-#define SPI4_I2S4_ADDR                  ( APB2_PERIPHERAL_BASE_ADDR + 0x3400 )
+#define SPI4_I2S4_BASE_ADDR                  ( APB2_PERIPHERAL_BASE_ADDR + 0x3400 )
 #define SYSCFG_BASE_ADDR                ( APB2_PERIPHERAL_BASE_ADDR + 0x3800 )
 #define EXTI_BASE_ADDR                  ( APB2_PERIPHERAL_BASE_ADDR + 0x3C00 )
 #define TIM9_BASE_ADDR                  ( APB2_PERIPHERAL_BASE_ADDR + 0x4000 )
@@ -160,14 +187,6 @@ typedef struct
 
 typedef struct
 {
-      volatile uint32_t MEMRMP          ;
-      volatile uint32_t PMC             ;
-      volatile uint32_t EXTICR[4]       ;
-      volatile uint32_t CMPCR           ;
-}SYSCFG_RegDef_t;
-
-typedef struct
-{
       volatile uint32_t MODER           ;
       volatile uint32_t OTYPER          ;
       volatile uint32_t OSPEEDR         ;
@@ -209,7 +228,7 @@ typedef struct
       volatile uint32_t PMC       ;
       volatile uint32_t EXTICR[4] ;  
       volatile uint32_t CMPCR     ;   
-}SYSCFG_RegDef_t;
+}SYSCFG_RegDef_t ;
 
 
 
@@ -240,6 +259,21 @@ typedef struct
 }ADC_RegDef_t;
 
 
+typedef struct 
+{
+      volatile uint32_t   CR1            ;
+      volatile uint32_t   CR2            ;
+      volatile uint32_t   SR             ;
+      volatile uint32_t   DR             ;
+      volatile uint32_t   CRCPR          ;
+      volatile uint32_t   RXCRCR         ;
+      volatile uint32_t   TXCRCR         ;
+      volatile uint32_t   I2SCFGR        ;
+      volatile uint32_t   I2SPR          ;
+}SPI_RegDef_t;
+
+
+
 
 #define      RCC      ((RCC_RegDef_t*)(RCC_BASE_ADDR))
 
@@ -250,6 +284,36 @@ typedef struct
 #define      GPIOD    ((GPIO_RegDef_t*)(GPIOD_BASE_ADDR))
 #define      GPIOE    ((GPIO_RegDef_t*)(GPIOE_BASE_ADDR))
 #define      GPIOH    ((GPIO_RegDef_t*)(GPIOH_BASE_ADDR))
+
+// SYSCFG & EXTI
+
+#define    EXTI                 ((EXTI_RegDef_t*)(EXTI_BASE_ADDR))
+#define    SYSCFG               ((SYSCFG_RegDef_t*)(SYSCFG_BASE_ADDR))
+
+#define    SPI1                 ((SPI_RegDef_t*)(SPI1_I2S1_BASE_ADDR))
+#define    SPI2                 ((SPI_RegDef_t*)(SPI2_I2S2_BASE_ADDR))
+#define    SPI3                 ((SPI_RegDef_t*)(SPI3_I2S3_BASE_ADDR))
+#define    SPI4                 ((SPI_RegDef_t*)(SPI4_I2S4_BASE_ADDR))
+#define    SPI5                 ((SPI_RegDef_t*)(SPI5_I2S5_BASE_ADDR))
+
+//                               SPI PERIPHERAL ENABLE MACRO 
+/*                               Clock Enable and Disable Macros for SPIx   peripheral                        */
+
+#define    SPI1_PCLK_EN()         RCC->APB2ENR  |=  (1<<12)
+#define    SPI2_PCLK_EN()         RCC->APB1ENR  |=  (1<<14)
+#define    SPI3_PCLK_EN()         RCC->APB1ENR  |=  (1<<15)
+#define    SPI4_PCLK_EN()         RCC->APB2ENR  |=  (1<<13)
+#define    SPI5_PCLK_EN()         RCC->APB2ENR  |=  (1<<20)
+
+
+#define    SPI1_PCLK_DI()         RCC->APB2ENR  &=  ~(1<<12)
+#define    SPI2_PCLK_DI()         RCC->APB1ENR  &=  ~(1<<14)
+#define    SPI3_PCLK_DI()         RCC->APB1ENR  &=  ~(1<<15)
+#define    SPI4_PCLK_DI()         RCC->APB2ENR  &=  ~(1<<13)
+#define    SPI5_PCLK_DI()         RCC->APB2ENR  &=  ~(1<<20)
+
+
+
 
 
 
@@ -272,8 +336,7 @@ typedef struct
 
 //
 
-/**********************************Macros to reset GPIOx peripheral*******************************/
-
+/**********************************Macros to reset GPIOx peripheral*******************************/         
 /*do while condition zero loop : This is a technique in 'C' programming to execute multiple 'C'
  statements using single 'C' macro                                                               */
 
@@ -284,10 +347,7 @@ typedef struct
 #define    GPIOE_REG_RESET()    do{ RCC->AHB1RSTR |= (1<<4)  ; RCC->AHB1RSTR &= ~(1<<4)  ;  }while(0)
 #define    GPIOH_REG_RESET()    do{ RCC->AHB1RSTR |= (1<<7)  ; RCC->AHB1RSTR &= ~(1<<7)  ;  }while(0)
 
-// SYSCFG & EXTI
 
-#define    EXTI                 ((EXTI_RegDef_t*)(EXTI_BASE_ADDR))
-#define    SYSCFG               ((SYSCFG_RegDef_t*)(SYSCFG_BASE_ADDR))
 // SYSCFG Enabling Macro
 
 #define    SYSCFG_PCLK_EN()     ( RCC->APB2ENR |=  (1<<14) )
@@ -317,9 +377,68 @@ typedef struct
 									   (x==GPIOE) ? 4 :\
 									   (x==GPIOH) ? 7 :0)
 
+/*
+    In STM32, an Interrupt Request Number (IRQ Number) is the number used by the NVIC
+    (Nested Vector Interrupt Controller) to identify a particular interrupt source.
+
+                                Think of it like this:
+
+                                    Peripheral/Event
+                                          ↓
+                                  Generates Interrupt
+                                          ↓
+                                  Assigned IRQ Number
+                                          ↓
+                                  NVIC uses IRQ Number
+                                          ↓
+                              Corresponding ISR executes
+
+    For EXTI, the mapping is not always 1-to-1.
+
+    EXTI Line → IRQ Number Mapping (STM32F4)
+
+    EXTI Line     | IRQ Name         | IRQ Number
+    ---------------------------------------------
+    EXTI0         | EXTI0_IRQn       | 6
+    EXTI1         | EXTI1_IRQn       | 7
+    EXTI2         | EXTI2_IRQn       | 8
+    EXTI3         | EXTI3_IRQn       | 9
+    EXTI4         | EXTI4_IRQn       | 10
+    EXTI5-9       | EXTI9_5_IRQn     | 23
+    EXTI10-15     | EXTI15_10_IRQn   | 40
+*/
+
+#define IRQ_NO_EXTI0         6
+#define IRQ_NO_EXTI1         7
+#define IRQ_NO_EXTI2         8
+#define IRQ_NO_EXTI3         9
+#define IRQ_NO_EXTI4         10
+#define IRQ_NO_EXTI9_5       23
+#define IRQ_NO_EXTI15_10     40
+
+/*******************************************Priority Levels**************************************/
+
+#define NVIC_IRQ_PRIO0       0
+#define NVIC_IRQ_PRIO1       1
+#define NVIC_IRQ_PRIO2       2
+#define NVIC_IRQ_PRIO3       3
+#define NVIC_IRQ_PRIO4       4
+#define NVIC_IRQ_PRIO5       5
+#define NVIC_IRQ_PRIO6       6
+#define NVIC_IRQ_PRIO7       7
+#define NVIC_IRQ_PRIO8       8
+#define NVIC_IRQ_PRIO9       9
+#define NVIC_IRQ_PRIO10      10
+#define NVIC_IRQ_PRIO11      11
+#define NVIC_IRQ_PRIO12      12
+#define NVIC_IRQ_PRIO13      13
+#define NVIC_IRQ_PRIO14      14
+#define NVIC_IRQ_PRIO15      15
+
+
 
 #include "stm32f411xx_gpio_driver.h"
-
+#include "stm32f411xx_spi_driver.h"
 
 
 #endif /* STM32F411XX_H_ */
