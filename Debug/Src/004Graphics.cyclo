@@ -1,0 +1,15 @@
+../Src/004Graphics.c:55:6:Spi2GpioInits	1
+../Src/004Graphics.c:98:6:Spi2Inits	1
+../Src/004Graphics.c:125:6:TFT_Select	1
+../Src/004Graphics.c:130:6:TFT_Unselect	1
+../Src/004Graphics.c:136:6:TFT_CommandMode	1
+../Src/004Graphics.c:141:6:TFT_DataMode	1
+../Src/004Graphics.c:144:6:lcd_write_cmd	1
+../Src/004Graphics.c:152:6:lcd_write_data	1
+../Src/004Graphics.c:164:6:lcd_reset	1
+../Src/004Graphics.c:171:6:lcd_init	1
+../Src/004Graphics.c:195:6:lcd_set_window	1
+../Src/004Graphics.c:216:6:lcd_fill_rect	2
+../Src/004Graphics.c:236:6:lcd_fill_screen	2
+../Src/004Graphics.c:255:6:lcd_draw_pixel	1
+../Src/004Graphics.c:289:5:main	4

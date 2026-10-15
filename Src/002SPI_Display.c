@@ -202,7 +202,9 @@ void lcd_init(void)
     lcd_reset();
 
     lcd_write_cmd(0x01); //systick_msec_delay(150); // software reset
+    for(int i=0;i<100000;i++) ;
     lcd_write_cmd(0x11); //systick_msec_delay(120); // sleep out
+    for(int i=0;i<100000;i++) ;
 
     lcd_write_cmd(0x3A);
     lcd_write_data(0x55);               // 16-bit RGB565
@@ -510,7 +512,12 @@ int main()
     lcd_init();
 
     //lcd_wave_flow_run();
-    lcd_draw_image(0, 0, 240, 320, image_eesha) ;
+     lcd_draw_image(0, 0, 240, 320, Fabulous) ;
+
+//    lcd_fill_rect(10,10,220,300,0x0000) ;
+//    lcd_fill_rect(20,20,180,260,0x07E0) ;
+
+    //lcd_wave_flow_run() ;
 
     while(1);
 }

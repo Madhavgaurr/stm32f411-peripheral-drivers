@@ -273,6 +273,19 @@ typedef struct
 }SPI_RegDef_t;
 
 
+typedef struct{
+	volatile uint32_t   CR1            ;
+	volatile uint32_t   CR2            ;
+	volatile uint32_t   SMCR             ;
+	volatile uint32_t   DIER             ;
+	volatile uint32_t   SR         ;
+	volatile uint32_t   EGR        ;
+	volatile uint32_t   CCMR1        ;
+	volatile uint32_t   CCMR2        ;
+	volatile uint32_t   I2SPR          ;
+}TIM_RegDef_t;
+
+
 
 
 #define      RCC      ((RCC_RegDef_t*)(RCC_BASE_ADDR))
